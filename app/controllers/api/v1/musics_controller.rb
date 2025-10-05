@@ -159,10 +159,18 @@ class Api::V1::MusicsController < ApplicationController
   end
 
   def find_or_create_genres(genre_names)
-    genre_names.map do |name|
-    Genre.find_or_create_by!(name:name.strip.downcase)
+    genre_names.map(&:strip).map(&:downcase).uniq.map do |name|
+   Genre.where('LOWER(name) = ?', name).first_or_create!(name: name)
         end
   end
+
+  private
+
+def set_music
+  @music = Music.find(params[:id])
+rescue ActiveRecord::RecordNotFound
+  render json: { errors: [{ field: 'music', message: 'Music not found', type: 'not_found' }] }, status: :not_found
+end
 
 end
 

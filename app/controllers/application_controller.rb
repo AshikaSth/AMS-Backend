@@ -5,6 +5,7 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
   include ErrorFormatter
 
+
   before_action :authorize_request, except: []
   attr_reader :current_user
 

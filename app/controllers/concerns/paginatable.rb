@@ -2,7 +2,7 @@ module Paginatable
   extend ActiveSupport::Concern
 
   def paginate(scope)
-    scope.page(params[:page]).per(params[:per_page] || 10)
+    scope.page(params[:page]).per(params[:per_page] || 100)
   end
 
   def paginate_meta(scope)

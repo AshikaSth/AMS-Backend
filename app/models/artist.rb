@@ -21,6 +21,10 @@ class Artist < ApplicationRecord
   validates :manager_id, numericality: { only_integer: true }, allow_nil: true
   validates :bio, length: { maximum: 1000 }, allow_blank: true
   validates :website, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]), message: "must be a valid URL" }, allow_blank: true
+  validates :first_release_year, numericality: { only_integer: true, greater_than_or_equal_to: 1900, less_than_or_equal_to: -> { Date.today.year } }, allow_nil: true
+  validate :valid_social_media_links
+  validates :genres, presence: { message: "must have at least one genre" }
+  validates :photo, presence: { message: "must be attached" }
 
   validate :acceptable_photo
 
@@ -33,6 +37,23 @@ class Artist < ApplicationRecord
 
     if photo.byte_size > 10.megabytes
       errors.add(:photo, "is too big. Max size is 10MB")
+    end
+  end
+
+  private
+
+  def valid_social_media_links
+    return if social_media_links.blank?
+
+    unless social_media_links.is_a?(Hash)
+      errors.add(:social_media_links, "must be a dictionary of site names and URLs")
+      return
+    end
+
+    social_media_links.each do |site, url|
+      unless url =~ URI::DEFAULT_PARSER.make_regexp(%w[http https])
+        errors.add(:social_media_links, "URL for #{site} must be a valid URL")
+      end
     end
   end
 end

@@ -1,6 +1,8 @@
 class Music < ApplicationRecord
   has_one_attached :cover_art
   has_one_attached :audio
+
+  belongs_to :creator, class_name: "Artist", foreign_key: "artist_id", optional: true
   
   has_many :artist_musics, dependent: :destroy
   has_many :artists, through: :artist_musics
@@ -10,10 +12,10 @@ class Music < ApplicationRecord
 
   has_many :music_genres, dependent: :destroy
   has_many :genres, through: :music_genres
-
-  belongs_to :creator, class_name: "Artist", foreign_key: "artist_id", optional: true
   
-  validates :title, presence: true, length: { minimum: 2, maximum: 255 }
+  validates :title, presence: true, length: { minimum: 2, maximum: 255 },
+   length: { minimum: 2, maximum: 255 },
+                 format: { with: /\A[[:print:]]+\z/, message: "may contain letters, numbers, spaces, and symbols" }
   validate :cover_art_format
   validate :audio_format
 

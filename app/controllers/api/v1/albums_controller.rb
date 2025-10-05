@@ -92,7 +92,7 @@ class Api::V1::AlbumsController < ApplicationController
       end
 
       if album_params[:music_ids].present?
-        @album.album_ids = Music.where(id: Array(album_params[:music_ids]).map(&:to_i)).pluck(:id)
+        @album.music_ids = Music.where(id: Array(album_params[:music_ids]).map(&:to_i)).pluck(:id)
       end
 
       if album_params[:genres].present?
@@ -142,8 +142,8 @@ class Api::V1::AlbumsController < ApplicationController
   end
 
   def find_or_create_genres(genre_names)
-    genre_names.map do |name|
-      Genre.find_or_create_by!(name:name.strip.downcase)
+    genre_names.map(&:strip).map(&:downcase).uniq.map do |name|
+      Genre.where('LOWER(name) = ?', name).first_or_create!(name: name)
     end
   end  
 end

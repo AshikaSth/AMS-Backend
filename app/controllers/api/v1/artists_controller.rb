@@ -116,6 +116,11 @@ class Api::V1::ArtistsController < ApplicationController
       unless file
         return render json: { error: "No file provided" }, status: :bad_request
       end
+    end
+  end
+
+  def destroy
+      begin
 
       imported = []
       errors = []
@@ -271,8 +276,8 @@ class Api::V1::ArtistsController < ApplicationController
   end
 
   def find_or_create_genres(genre_names)
-      genre_names.map do |name|
-      Genre.find_or_create_by!(name: name.strip.downcase)
+      genre_names.map(&:strip).map(&:downcase).uniq.map do |name|
+      Genre.where('LOWER(name) = ?', name).first_or_create!(name: name)
       end
   end    
 end
