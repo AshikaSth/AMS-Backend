@@ -26,43 +26,50 @@ class Api::V1::ArtistsController < ApplicationController
     rescue ActiveRecord::RecordNotFound => e
         render json: { errors: [{ field: 'artist', message: 'Artist not found', type: 'not_found' }] }, status: :not_found
     end
-    
-    
-    def create
-      begin
 
-        genres = artist_params[:genres]
-        photo = artist_params[:photo]
-        Rails.logger.info "Received photo: #{photo.inspect}"
-
-        if current_user.artist?
-          @artist = current_user.build_artist(artist_params.except(:genres, :photo))
-          @artist.manager_id = nil
-        else
-          @artist = Artist.new(artist_params.except(:genres, :photo))
-          @artist.manager_id = current_user.id if current_user.artist_manager?
-        end
-        
-        authorize @artist
-
-        if genres.present?
-          @artist.genres = find_or_create_genres(genres)
-        end
-        
-        if photo.present?
-          @artist.photo.attach(photo)
-        end
-
-        if @artist.save
-          render json: @artist, status: :created
-        else
-          render json: { errors: formatted_errors(@artist) }, status: :unprocessable_entity
-        end
-      rescue Pundit::NotAuthorizedError
-        render json: { errors: [{ field: 'authorization', message: 'You are not authorized to perform this action', type: 'authorization_error' }] }, status: :forbidden
-
-      end
+     def show
+        artist = Artist.find(params[:id])
+        render json: artist, serializer:  ArtistSerializer, status: :ok
+    rescue ActiveRecord::RecordNotFound => e
+        render json: { errors: [{ field: 'artist', message: 'Artist not found', type: 'not_found' }] }, status: :not_found
     end
+    
+    
+  def create
+    begin
+
+      genres = artist_params[:genres]
+      photo = artist_params[:photo]
+      Rails.logger.info "Received photo: #{photo.inspect}"
+
+      if current_user.artist?
+        @artist = current_user.build_artist(artist_params.except(:genres, :photo))
+        @artist.manager_id = nil
+      else
+        @artist = Artist.new(artist_params.except(:genres, :photo))
+        @artist.manager_id = current_user.id if current_user.artist_manager?
+      end
+      
+      authorize @artist
+
+      if genres.present?
+        @artist.genres = find_or_create_genres(genres)
+      end
+      
+      if photo.present?
+        @artist.photo.attach(photo)
+      end
+
+      if @artist.save
+        render json: @artist, status: :created
+      else
+        render json: { errors: formatted_errors(@artist) }, status: :unprocessable_entity
+      end
+    rescue Pundit::NotAuthorizedError
+      render json: { errors: [{ field: 'authorization', message: 'You are not authorized to perform this action', type: 'authorization_error' }] }, status: :forbidden
+
+    end
+  end
 
 
   def update
@@ -127,7 +134,6 @@ class Api::V1::ArtistsController < ApplicationController
 
       CSV.foreach(file.path, headers: true) do |row|
         begin
-          # Match export headers exactly
           first_name            = row['First Name']
           last_name             = row['Last Name']
           email                 = row['Email']
@@ -137,7 +143,6 @@ class Api::V1::ArtistsController < ApplicationController
           user_id               = row['User Id']
           website               = row['Website']
 
-          # Ensure user exists or create
           user = User.find_or_initialize_by(email: email)
           if user.new_record?
             user.first_name = first_name

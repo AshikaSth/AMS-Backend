@@ -16,7 +16,7 @@ class User < ApplicationRecord
   }, if: :password_required?
   validates :first_name, presence: true, length: { minimum: 2, maximum: 50 }, format: { with: /\A[a-zA-Z\s'-]+\z/, message: "must contain only letters, spaces, hyphens, or apostrophes" }
   validates :last_name, presence: true, length: { minimum: 2, maximum: 50 }, format: { with: /\A[a-zA-Z\s'-]+\z/, message: "must contain only letters, spaces, hyphens, or apostrophes" }
-  validates :phone_number, format: { with: /\A\+?\d{10,15}\z/, message: "must be a valid phone number (10-15 digits, optional leading +)" }, allow_nil: true
+  validates :phone_number, uniqueness: true, allow_nil: true
   validates :address, length: { maximum: 255 }, allow_nil: true
   validates :dob, presence: true
   validate :dob_must_be_valid_date

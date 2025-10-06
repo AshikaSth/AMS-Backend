@@ -35,7 +35,7 @@ Rails.application.routes.draw do
       post "/login", to: "auth#login"
       delete "/logout", to: "auth#logout"
       get "/profile", to: "auth#profile"
-      patch "/update_profile", to: "auth#update_profile"
+      patch "/profile", to: "auth#update_profile"
 
       post "register", to: "auth#register"
       post "refresh", to: "auth#refresh"
